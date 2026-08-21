@@ -6,55 +6,80 @@
 <title>Revo Card</title>
 <style>
   :root{
-    --ink:#0e1420;--panel:#141b28;--panel2:#1b2432;--line:#2a3548;
-    --txt:#eef2f8;--mut:#8a97ab;--accent:#2fd4b8;--accent-d:#1a9d88;
-    --gold:#c9a24b;--pink:#ff5d73;
+    --ink:#0d1526;--panel:#141f33;--panel2:#1a2740;--line:#26344d;
+    --txt:#eef2f8;--mut:#8b96a8;--accent:#c9a24b;--accent-d:#a5822f;--accent-ink:#2a1f04;
+    --accent-rgb:201,162,75;--warn:#e8b93f;--pink:#ff5d73;
+  }
+  body.mode-s{
+    --ink:#160b23;--panel:#241335;--panel2:#2e1846;--line:#432464;
+    --txt:#faf0ff;--mut:#b79ecf;--accent:#ff4f9a;--accent-d:#c23f76;--accent-ink:#2b0619;
+    --accent-rgb:255,79,154;
+  }
+  body.mode-k{
+    --ink:#eaf6f7;--panel:#ffffff;--panel2:#f1fbfa;--line:#cfeee9;
+    --txt:#123238;--mut:#5b7c81;--accent:#2bb3a3;--accent-d:#1f8f82;--accent-ink:#04231d;
+    --accent-rgb:43,179,163;
+  }
+  body.mode-h{
+    --ink:#fff5f5;--panel:#ffffff;--panel2:#fff0f0;--line:#f3c9c9;
+    --txt:#3a1414;--mut:#8a5a5a;--accent:#e0342f;--accent-d:#b3221e;--accent-ink:#ffffff;
+    --accent-rgb:224,52,47;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--ink);color:var(--txt);min-height:100vh}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--ink);color:var(--txt);
+    min-height:100vh;transition:background .25s,color .25s}
   a{color:inherit;text-decoration:none}
   .wrap{max-width:480px;margin:0 auto;padding:18px 16px 60px}
 
   /* ===== Fill mode ===== */
   .fhead{text-align:center;padding:14px 0 22px}
   .fhead .logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--accent-d));
-    display:grid;place-items:center;margin:0 auto 12px;font-weight:800;color:#04231d;font-size:22px}
+    display:grid;place-items:center;margin:0 auto 12px;font-weight:800;color:var(--accent-ink);font-size:22px}
   .fhead h1{font-size:20px;font-weight:800}
   .fhead p{font-size:13px;color:var(--mut);margin-top:5px}
+  .back-link{display:inline-block;font-size:12.5px;color:var(--mut);margin-bottom:10px;cursor:pointer}
+  .back-link:active{color:var(--accent)}
+
+  .mode-grid{margin-top:4px}
+  .mode-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;
+    display:flex;align-items:center;gap:14px;cursor:pointer;transition:.15s}
+  .mode-card:active{transform:scale(.98);border-color:var(--accent)}
+  .mc-ic{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+  .mc-t{font-size:15px;font-weight:800;margin-bottom:3px}
+  .mc-d{font-size:12px;color:var(--mut);line-height:1.5}
+
+  .notice-box{background:#fff3cd;border:1px solid #ffe08a;color:#7a5b00;border-radius:13px;padding:12px 14px;
+    font-size:12.5px;line-height:1.7;margin-bottom:14px}
 
   .card-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
   .card-box h3{font-size:13px;color:var(--accent);margin-bottom:12px;font-weight:700}
   .field{margin-bottom:12px}
   .field:last-child{margin-bottom:0}
   .field label{font-size:12px;color:var(--mut);margin-bottom:6px;display:block;font-weight:600}
-  .field input,.field textarea{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;
+  .field input,.field textarea,.field select{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;
     background:var(--panel2);color:var(--txt);font-family:inherit;font-size:14px;outline:none;transition:.15s}
-  .field input:focus,.field textarea:focus{border-color:var(--accent)}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
   .field textarea{resize:vertical;min-height:60px}
   .field .req{color:var(--pink);font-size:10px}
+  .field .hint{font-size:11px;color:var(--mut);margin-top:6px;line-height:1.5}
 
-  .avatar-pick{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  .av-opt{width:40px;height:40px;border-radius:11px;border:2px solid transparent;cursor:pointer;display:grid;place-items:center;
-    font-weight:800;color:#04231d;font-size:15px}
-  .av-opt.on{border-color:#fff}
-
-  .byte-meter{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:14px;
+  .byte-meter{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:6px;
     display:flex;align-items:center;gap:11px}
   .byte-meter .bm-bar{flex:1;height:8px;background:var(--panel2);border-radius:5px;overflow:hidden}
   .byte-meter .bm-bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:.2s}
-  .byte-meter .bm-bar i.warn{background:var(--gold)}
+  .byte-meter .bm-bar i.warn{background:var(--warn)}
   .byte-meter .bm-bar i.over{background:var(--pink)}
   .byte-meter .bm-txt{font-size:11.5px;color:var(--mut);white-space:nowrap;font-weight:700}
+  .bm-hint{font-size:11.5px;color:var(--pink);margin:8px 2px 14px;line-height:1.6;display:none}
 
   .btn{width:100%;padding:15px;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;
     transition:.2s;font-family:inherit}
-  .btn-main{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#04231d}
+  .btn-main{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:var(--accent-ink)}
   .btn-main:active{transform:scale(.98)}
   .btn-main:disabled{opacity:.4;cursor:not-allowed}
   .btn-ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt);margin-top:10px}
 
-  .result-box{background:linear-gradient(160deg,#173029,var(--panel));border:1px solid rgba(47,212,184,.3);
-    border-radius:16px;padding:18px;margin-top:16px;display:none}
+  .result-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:16px;display:none}
   .result-box.show{display:block}
   .result-box h3{color:var(--accent);font-size:15px;margin-bottom:10px}
   .result-box .link-row{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px;
@@ -64,26 +89,39 @@
 
   /* ===== View mode (the actual digital card) ===== */
   .vcard{max-width:420px;margin:30px auto;padding:0 16px}
-  .vhero{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:22px;
+  .vhero{background:var(--panel);border:1px solid var(--line);border-radius:22px;
     padding:30px 24px;text-align:center;position:relative;overflow:hidden}
   .vhero::before{content:"";position:absolute;top:-40%;right:-15%;width:60%;height:170%;
-    background:radial-gradient(circle,rgba(47,212,184,.15),transparent 65%)}
+    background:radial-gradient(circle,rgba(var(--accent-rgb),.18),transparent 65%)}
+  .v-av,.mc-ic{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:var(--accent-ink)}
   .v-av{width:92px;height:92px;border-radius:26px;margin:0 auto 16px;display:grid;place-items:center;font-size:38px;
-    font-weight:800;color:#04231d;position:relative;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    font-weight:800;position:relative;box-shadow:0 10px 28px rgba(0,0,0,.25);object-fit:cover}
+  .v-img{object-fit:cover}
   .vhero h1{font-size:24px;font-weight:800;position:relative}
   .vhero .vsub{font-size:14px;color:var(--mut);margin-top:4px;position:relative}
   .vhero .vbio{font-size:13px;color:var(--mut);margin-top:12px;line-height:1.7;position:relative}
+  .kid-tag{display:inline-block;background:var(--panel2);color:var(--accent-d);font-size:11px;font-weight:800;
+    padding:4px 12px;border-radius:20px;margin-bottom:10px;position:relative}
+  .med-cross{width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:grid;place-items:center;font-size:30px;
+    font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;
+    box-shadow:0 10px 26px rgba(var(--accent-rgb),.3);position:relative}
 
-  .save-btn{width:100%;padding:16px;margin-top:22px;border:none;border-radius:14px;font-size:15.5px;font-weight:800;
-    background:linear-gradient(135deg,var(--gold),#e8c877);color:#2a1f04;cursor:pointer;position:relative;
-    box-shadow:0 8px 22px rgba(201,162,75,.3)}
-  .save-btn:active{transform:scale(.98)}
+  .save-btn,.cta-btn{width:100%;padding:16px;margin-top:22px;border:none;border-radius:14px;font-size:15.5px;font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent-d));color:var(--accent-ink);cursor:pointer;position:relative;
+    box-shadow:0 8px 22px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;gap:9px}
+  .save-btn:active,.cta-btn:active{transform:scale(.98)}
+  .cta-ic{font-size:19px}
+
+  .badge-row{display:flex;justify-content:center;gap:8px;margin-top:12px;position:relative;flex-wrap:wrap}
+  .badge{background:var(--panel2);border:1px solid var(--line);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700}
+  .med-note{margin-top:14px}
 
   .contact-list{margin-top:16px;display:flex;flex-direction:column;gap:9px}
   .c-row{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
     padding:14px;transition:.15s}
   .c-row:active{transform:scale(.98);border-color:var(--accent)}
-  .c-row .ci{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+  .c-row .ci{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex-shrink:0;
+    background:var(--panel2);border:1px solid var(--line)}
   .c-row .ct{flex:1;min-width:0}
   .c-row .ct b{font-size:13.5px;display:block}
   .c-row .ct span{font-size:11.5px;color:var(--mut);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -92,13 +130,24 @@
   .s-tile{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:13px;
     padding:13px;font-size:13px;font-weight:600}
   .s-tile:active{transform:scale(.97)}
+  .s-tile-lg{flex-direction:column;text-align:center;padding:20px 12px;gap:8px;font-size:13.5px}
+  .s-tile-lg .s-ic{font-size:27px}
 
-  .footer-note{text-align:center;font-size:11px;color:var(--mut);margin-top:28px;opacity:.6}
+  .med-info{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .med-block{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .med-block b{display:block;font-size:12.5px;color:var(--accent-d);margin-bottom:5px}
+  .med-block p{font-size:13.5px;line-height:1.6}
+  .med-block.med-alert{border-color:var(--accent)}
+
+  .safety-note{margin-top:18px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px 16px;
+    font-size:12.5px;color:var(--mut);line-height:1.8;text-align:center}
+
+  .footer-note{text-align:center;font-size:11px;color:var(--mut);margin-top:28px;opacity:.7}
   .empty-view{max-width:420px;margin:80px auto;text-align:center;padding:0 20px;color:var(--mut)}
   .empty-view .ei{font-size:44px;margin-bottom:14px}
 
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);
-    color:#04231d;padding:13px 22px;border-radius:13px;font-weight:700;font-size:13.5px;opacity:0;transition:.3s;
+    color:var(--accent-ink);padding:13px 22px;border-radius:13px;font-weight:700;font-size:13.5px;opacity:0;transition:.3s;
     z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.35);max-width:88%;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -111,10 +160,96 @@
 /* ============================================================
    REVO CARD — single static file, zero server, zero database.
    All data lives inside the URL hash, base64url-encoded JSON.
+   Four card modes: business (b, default), social (s), kids (k),
+   medical (h). Old links with no "m" key are treated as "b" so
+   every link ever generated keeps working forever.
    ============================================================ */
 
-const AVATAR_COLORS=[['#2fd4b8','#1a9d88'],['#4fa8ff','#2d6fb0'],['#ff5d73','#c7415a'],
-  ['#c9a24b','#a5822f'],['#8b7dff','#5a4dd4'],['#3fc47c','#279d5c']];
+const TAG_BUDGET=144; // NTAG213 usable NDEF bytes (conservative)
+const BLOOD_GROUPS=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+const HANDLE_FIELDS=['ig','tt','sc','tw','li','tg','yt'];
+const SOCIAL_LINKS={
+  ig:u=>'https://instagram.com/'+u, tt:u=>'https://tiktok.com/@'+u,
+  sc:u=>'https://snapchat.com/add/'+u, tw:u=>'https://x.com/'+u,
+  li:u=>'https://linkedin.com/in/'+u, tg:u=>'https://t.me/'+u,
+  yt:u=>'https://youtube.com/@'+u
+};
+const SOCIAL_ICONS={ig:'📷',tt:'🎵',sc:'👻',tw:'𝕏',li:'💼',tg:'✈️',yt:'▶️'};
+const SOCIAL_LABELS={ig:'Instagram',tt:'TikTok',sc:'Snapchat',tw:'X',li:'LinkedIn',tg:'Telegram',yt:'YouTube'};
+
+const IMG_FIELD={k:'img',label:'رابط الصورة الشخصية (اختياري)',ph:'https://i.imgur.com/xxxx.jpg',
+  hint:'ارفع صورتك على Imgur أو أي خدمة استضافة صور مجانية، والصق رابط الصورة الناتج هنا فقط — وليس الصورة نفسها. إذا تُرك فارغًا سيظهر حرف اسمك بخلفية ملوّنة.'};
+
+const MODES={
+  b:{title:'بطاقة أعمال',icon:'💼',desc:'تصميم احترافي لبطاقتك الوظيفية وجهات التواصل',
+    sections:[
+      {title:'المعلومات الأساسية',fields:[
+        {k:'n',label:'الاسم الكامل',ph:'محسن الراشد',req:true},
+        {k:'t',label:'المسمى الوظيفي',ph:'مؤسس Revo'},
+        {k:'c',label:'الشركة',ph:'Revo'},
+        {k:'bio',label:'نبذة قصيرة',ph:'جملة واحدة عنك...',type:'textarea'},
+      ]},
+      {title:'معلومات التواصل',fields:[
+        {k:'p',label:'رقم الهاتف',ph:'+973 3300 0000',type:'tel'},
+        {k:'w',label:'واتساب (إن كان مختلف)',ph:'+973 3300 0000',type:'tel'},
+        {k:'e',label:'البريد الإلكتروني',ph:'name@email.com'},
+        {k:'web',label:'الموقع الإلكتروني',ph:'yoursite.com'},
+      ]},
+      {title:'حسابات التواصل المهنية',fields:[
+        {k:'ig',label:'إنستقرام',ph:'username'},
+        {k:'li',label:'لينكدإن',ph:'username'},
+        {k:'tw',label:'X (تويتر)',ph:'username'},
+      ]},
+      {title:'صورة شخصية',fields:[IMG_FIELD]},
+    ]},
+  s:{title:'شخصية / سوشال ميديا',icon:'✨',desc:'بطاقة "Link in Bio" حيوية لكل حساباتك',
+    sections:[
+      {title:'الهوية',fields:[
+        {k:'n',label:'الاسم أو الاسم المستعار',ph:'mohsen',req:true},
+        {k:'bio',label:'نبذة قصيرة جذابة',ph:'محتوى، سفر، تصوير 📸',type:'textarea'},
+      ]},
+      {title:'حسابات التواصل الاجتماعي',fields:[
+        {k:'ig',label:'إنستقرام',ph:'username'},
+        {k:'tt',label:'تيك توك',ph:'username'},
+        {k:'sc',label:'سناب شات',ph:'username'},
+        {k:'yt',label:'يوتيوب',ph:'username'},
+        {k:'tw',label:'X (تويتر)',ph:'username'},
+        {k:'tg',label:'تيليجرام',ph:'username'},
+      ]},
+      {title:'صورة شخصية',fields:[IMG_FIELD]},
+    ]},
+  k:{title:'بطاقة أمان الطفل',icon:'🧒',desc:'معلومة طارئة مبسّطة واتصال فوري بولي الأمر',
+    notice:'⚠️ لأسباب أمنية: لا تُدخل العنوان السكني، اسم المدرسة، أو اسم العائلة الكامل. أي شخص يلمس هذا التاق سيرى فقط ما تكتبه هنا.',
+    sections:[
+      {title:'معلومات الطفل',fields:[
+        {k:'n',label:'الاسم الأول',ph:'سلطان',req:true,hint:'الاسم الأول فقط، بدون اسم العائلة.'},
+        {k:'bg',label:'فصيلة الدم (اختياري)',type:'select',opts:BLOOD_GROUPS},
+        {k:'med',label:'معلومة طبية طارئة (اختياري)',ph:'حساسية من بنسلين',type:'textarea'},
+      ]},
+      {title:'التواصل مع ولي الأمر',fields:[
+        {k:'gp',label:'رقم هاتف ولي الأمر',ph:'+973 3300 0000',type:'tel',req:true,
+          hint:'سيظهر كزر اتصال مباشر فقط — لن يُعرض كنص مقروء على البطاقة.'},
+      ]},
+    ]},
+  h:{title:'بطاقة صحية طارئة',icon:'🩺',desc:'معلومات طبية طارئة تظهر بلمسة واحدة',
+    sections:[
+      {title:'المعلومات الأساسية',fields:[
+        {k:'n',label:'الاسم الكامل',ph:'محسن الراشد',req:true},
+        {k:'bg',label:'فصيلة الدم',type:'select',opts:BLOOD_GROUPS},
+      ]},
+      {title:'معلومات طبية طارئة',fields:[
+        {k:'cond',label:'الحالات الصحية المزمنة',ph:'السكري، ضغط الدم',type:'textarea'},
+        {k:'all',label:'الحساسية من أدوية',ph:'بنسلين، أسبرين',type:'textarea'},
+        {k:'meds',label:'الأدوية الحالية',ph:'إنسولين، أسبرين يومي',type:'textarea'},
+      ]},
+      {title:'جهة الاتصال الطارئة',fields:[
+        {k:'ep',label:'رقم التواصل الطارئ',ph:'+973 3300 0000',type:'tel',req:true,
+          hint:'يظهر كأول وأبرز زر اتصال على البطاقة.'},
+      ]},
+      {title:'صورة شخصية',fields:[IMG_FIELD]},
+    ]},
+};
+const MODE_ORDER=['b','s','k','h'];
 
 /* ---- compact encode/decode (short keys to save bytes) ---- */
 function encodeData(d){
@@ -136,10 +271,20 @@ function currentUrl(data){
   return base+'#d='+encodeData(data);
 }
 function byteLen(str){return new TextEncoder().encode(str).length}
+function normalizeUrl(u){return /^https?:\/\//i.test(u)?u:'https://'+u}
+function cleanHandle(v){
+  if(!v)return '';
+  let s=v.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+  const slash=s.indexOf('/');
+  if(slash!==-1 && s.slice(0,slash).includes('.')) s=s.slice(slash+1);
+  return s.replace(/^@/,'').replace(/\/+$/,'');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 let toastT;
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');
   clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
+function applyTheme(m){document.body.className='mode-'+(m||'b')}
 
 /* ---- router ---- */
 function boot(){
@@ -147,6 +292,7 @@ function boot(){
   if(hash.startsWith('#d=')){
     const data=decodeData(hash.slice(3));
     if(data) return renderView(data);
+    applyTheme('b');
     return renderEmpty();
   }
   renderFill();
@@ -156,63 +302,85 @@ window.addEventListener('hashchange',boot);
 /* ============================================================
    FILL MODE
    ============================================================ */
-let state={n:'',t:'',c:'',p:'',w:'',e:'',web:'',ig:'',li:'',tw:'',tt:'',bio:'',av:0};
+let state={m:null,_step:'pick',n:'',t:'',c:'',bio:'',p:'',w:'',e:'',web:'',
+  ig:'',li:'',tw:'',tt:'',sc:'',yt:'',tg:'',img:'',med:'',bg:'',gp:'',cond:'',all:'',meds:'',ep:''};
 
 function renderFill(){
+  if(!state.m || state._step==='pick') renderModePick();
+  else renderModeForm();
+}
+
+function renderModePick(){
+  applyTheme('b');
   const app=document.getElementById('app');
   app.innerHTML=`
   <div class="wrap">
     <div class="fhead">
       <div class="logo">R</div>
       <h1>أنشئ بطاقتك الرقمية</h1>
-      <p>عبّي بياناتك، واحصل على رابط تكتبه على تاق NFC الخاص فيك</p>
+      <p>اختر نوع البطاقة، عبّي بياناتك، واحصل على رابط تكتبه على تاق NFC الخاص فيك</p>
     </div>
-
-    <div class="card-box">
-      <h3>المعلومات الأساسية</h3>
-      <div class="field"><label>الاسم الكامل <span class="req">*إجباري</span></label>
-        <input id="f_n" placeholder="محسن الراشد" oninput="upd('n',this.value)"></div>
-      <div class="field"><label>المسمى الوظيفي</label>
-        <input id="f_t" placeholder="مؤسس Revo" oninput="upd('t',this.value)"></div>
-      <div class="field"><label>الشركة</label>
-        <input id="f_c" placeholder="Revo" oninput="upd('c',this.value)"></div>
-      <div class="field"><label>نبذة قصيرة</label>
-        <textarea id="f_bio" placeholder="جملة واحدة عنك..." oninput="upd('bio',this.value)"></textarea></div>
-      <div class="field"><label>لون البطاقة</label>
-        <div class="avatar-pick" id="avPick"></div></div>
+    <div class="mode-grid">
+      ${MODE_ORDER.map(k=>{const mo=MODES[k];return `
+      <div class="mode-card" onclick="pickMode('${k}')">
+        <div class="mc-ic">${mo.icon}</div>
+        <div>
+          <div class="mc-t">${mo.title}</div>
+          <div class="mc-d">${mo.desc}</div>
+        </div>
+      </div>`;}).join('')}
     </div>
+    <div class="footer-note">Revo Card · لا سيرفر، لا قاعدة بيانات — بياناتك داخل رابطك فقط</div>
+  </div>`;
+}
+function pickMode(k){
+  state.m=k; state._step='form';
+  renderFill();
+}
+function backToPick(){state._step='pick';renderFill();}
 
-    <div class="card-box">
-      <h3>معلومات التواصل</h3>
-      <div class="field"><label>رقم الهاتف</label>
-        <input id="f_p" placeholder="+973 3300 0000" oninput="upd('p',this.value)"></div>
-      <div class="field"><label>واتساب (إن كان مختلف)</label>
-        <input id="f_w" placeholder="+973 3300 0000" oninput="upd('w',this.value)"></div>
-      <div class="field"><label>البريد الإلكتروني</label>
-        <input id="f_e" placeholder="name@email.com" oninput="upd('e',this.value)"></div>
-      <div class="field"><label>الموقع الإلكتروني</label>
-        <input id="f_web" placeholder="yoursite.com" oninput="upd('web',this.value)"></div>
+function fieldsOf(mo){return mo.sections.flatMap(s=>s.fields)}
+function requiredKeys(mo){return fieldsOf(mo).filter(f=>f.req).map(f=>f.k)}
+
+function renderField(f){
+  const id='f_'+f.k;
+  const reqMark=f.req?'<span class="req">*إجباري</span>':'';
+  let control;
+  if(f.type==='textarea'){
+    control=`<textarea id="${id}" placeholder="${f.ph||''}" oninput="upd('${f.k}',this.value)"></textarea>`;
+  }else if(f.type==='select'){
+    const opts=f.opts.map(o=>`<option value="${o}">${o}</option>`).join('');
+    control=`<select id="${id}" onchange="upd('${f.k}',this.value)"><option value="">— اختر —</option>${opts}</select>`;
+  }else{
+    control=`<input id="${id}" type="${f.type||'text'}" placeholder="${f.ph||''}" oninput="upd('${f.k}',this.value)">`;
+  }
+  const hint=f.hint?`<div class="hint">${f.hint}</div>`:'';
+  return `<div class="field"><label>${f.label} ${reqMark}</label>${control}${hint}</div>`;
+}
+function renderSection(sec){
+  return `<div class="card-box"><h3>${sec.title}</h3>${sec.fields.map(renderField).join('')}</div>`;
+}
+
+function renderModeForm(){
+  const mo=MODES[state.m];
+  applyTheme(state.m);
+  const app=document.getElementById('app');
+  app.innerHTML=`
+  <div class="wrap">
+    <div class="fhead">
+      <a class="back-link" onclick="backToPick();return false;" href="#">← تغيير نوع البطاقة</a>
+      <div class="logo">${mo.icon}</div>
+      <h1>${mo.title}</h1>
+      <p>${mo.desc}</p>
     </div>
-
-    <div class="card-box">
-      <h3>حسابات التواصل الاجتماعي</h3>
-      <div class="field"><label>إنستقرام</label>
-        <input id="f_ig" placeholder="username" oninput="upd('ig',this.value)"></div>
-      <div class="field"><label>لينكدإن</label>
-        <input id="f_li" placeholder="username" oninput="upd('li',this.value)"></div>
-      <div class="field"><label>X (تويتر)</label>
-        <input id="f_tw" placeholder="username" oninput="upd('tw',this.value)"></div>
-      <div class="field"><label>تيك توك</label>
-        <input id="f_tt" placeholder="username" oninput="upd('tt',this.value)"></div>
-    </div>
-
+    ${mo.notice?`<div class="notice-box">${mo.notice}</div>`:''}
+    ${mo.sections.map(renderSection).join('')}
     <div class="byte-meter">
       <div class="bm-bar"><i id="bmBar" style="width:0%"></i></div>
-      <div class="bm-txt" id="bmTxt">0 / 144 بايت</div>
+      <div class="bm-txt" id="bmTxt">0 / ${TAG_BUDGET} بايت</div>
     </div>
-
+    <div class="bm-hint" id="bmHint"></div>
     <button class="btn btn-main" id="genBtn" onclick="generateLink()" disabled>🔗 أنشئ رابطي الآن</button>
-
     <div class="result-box" id="resultBox">
       <h3>✅ رابطك جاهز!</h3>
       <div class="link-row" id="linkOut"></div>
@@ -224,73 +392,71 @@ function renderFill(){
         ٢. اختر كتابة رابط (Website / URL)<br>
         ٣. الصق هذا الرابط بالكامل<br>
         ٤. اكتبه على تاق Revo الخاص بك<br>
-        ٥. جرّب: قرّب أي هاتف من التاق — بطاقتك تظهر فوراً
+        ٥. جرّب: قرّب أي هاتف من التاق — بطاقتك تظهر فوراً<br>
+        <b>ملاحظة:</b> المتصفح لا يمكنه كتابة التاق تلقائيًا — هذه خطوة يدوية دائمًا عبر تطبيق NFC خارجي.
       </div>
     </div>
-
     <div class="footer-note">Revo Card · لا سيرفر، لا قاعدة بيانات — بياناتك داخل رابطك فقط</div>
   </div>`;
-
-  // avatar picker
-  const pick=document.getElementById('avPick');
-  AVATAR_COLORS.forEach((c,i)=>{
-    const d=document.createElement('div');
-    d.className='av-opt'+(i===state.av?' on':'');
-    d.style.background='linear-gradient(135deg,'+c[0]+','+c[1]+')';
-    d.textContent=(state.n||'ر')[0];
-    d.onclick=()=>{state.av=i;renderFill();fillInputs()};
-    pick.appendChild(d);
+  fillInputs(mo);
+  updateMeter();
+}
+function fillInputs(mo){
+  fieldsOf(mo).forEach(f=>{
+    const el=document.getElementById('f_'+f.k);
+    if(el) el.value=state[f.k]||'';
   });
-  fillInputs();
-  updateMeter();
 }
-function fillInputs(){
-  document.getElementById('f_n').value=state.n;
-  document.getElementById('f_t').value=state.t;
-  document.getElementById('f_c').value=state.c;
-  document.getElementById('f_bio').value=state.bio;
-  document.getElementById('f_p').value=state.p;
-  document.getElementById('f_w').value=state.w;
-  document.getElementById('f_e').value=state.e;
-  document.getElementById('f_web').value=state.web;
-  document.getElementById('f_ig').value=state.ig;
-  document.getElementById('f_li').value=state.li;
-  document.getElementById('f_tw').value=state.tw;
-  document.getElementById('f_tt').value=state.tt;
-}
-function upd(k,v){
-  state[k]=v;
-  if(k==='n'){document.querySelectorAll('.av-opt').forEach(el=>el.textContent=(v||'ر')[0])}
-  updateMeter();
-}
+function upd(k,v){state[k]=v;updateMeter()}
+
 function packState(){
-  // strip empty fields to save bytes
+  if(!state.m) return {};
+  const mo=MODES[state.m];
   const d={};
-  const map={n:'n',t:'t',c:'c',p:'p',w:'w',e:'e',web:'web',ig:'ig',li:'li',tw:'tw',tt:'tt',bio:'bio',av:'av'};
-  Object.keys(map).forEach(k=>{
-    if(k==='av'){d.av=state.av;return}
-    if(state[k]&&state[k].trim())d[k]=state[k].trim();
+  if(state.m!=='b') d.m=state.m;
+  fieldsOf(mo).forEach(f=>{
+    let v=state[f.k];
+    if(!v) return;
+    if(HANDLE_FIELDS.includes(f.k)) v=cleanHandle(v);
+    v=String(v).trim();
+    if(v) d[f.k]=v;
   });
   return d;
 }
-const TAG_BUDGET=144; // NTAG213 usable NDEF bytes (conservative)
 function updateMeter(){
+  const mo=MODES[state.m];
   const d=packState();
   const url=currentUrl(d);
   const bytes=byteLen(url);
   const pct=Math.min(100,(bytes/TAG_BUDGET)*100);
   const bar=document.getElementById('bmBar');
   const txt=document.getElementById('bmTxt');
+  if(!bar)return;
   bar.style.width=pct+'%';
   bar.className=bytes>TAG_BUDGET?'over':(bytes>TAG_BUDGET*0.8?'warn':'');
   txt.textContent=bytes+' / '+TAG_BUDGET+' بايت (لتاق NTAG213)';
-  const genBtn=document.getElementById('genBtn');
-  genBtn.disabled=!state.n.trim();
+
+  const hintEl=document.getElementById('bmHint');
+  if(bytes>TAG_BUDGET){
+    const sizes=Object.keys(d).filter(k=>k!=='m').map(k=>({k,len:byteLen(String(d[k]))})).sort((a,b)=>b.len-a.len);
+    const labels=sizes.slice(0,2).map(s=>{const f=fieldsOf(mo).find(f=>f.k===s.k);return f?f.label:s.k});
+    hintEl.style.display='block';
+    hintEl.textContent=labels.length?'تجاوزت الحد! جرّب اختصار أو حذف: '+labels.join('، '):'تجاوزت الحد المسموح به لتاق NFC.';
+  }else{
+    hintEl.style.display='none';
+  }
+
+  const req=requiredKeys(mo);
+  const missing=req.some(k=>!String(state[k]||'').trim());
+  document.getElementById('genBtn').disabled=missing||bytes>TAG_BUDGET;
 }
 function generateLink(){
-  if(!state.n.trim()){toast('الاسم إجباري');return}
+  const mo=MODES[state.m];
+  const missing=requiredKeys(mo).find(k=>!String(state[k]||'').trim());
+  if(missing){toast('يرجى تعبئة الحقول الإجبارية');return}
   const d=packState();
   const url=currentUrl(d);
+  if(byteLen(url)>TAG_BUDGET){toast('الرابط أكبر من حد التاق — اختصر البيانات');return}
   document.getElementById('linkOut').textContent=url;
   document.getElementById('resultBox').classList.add('show');
   document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'start'});
@@ -309,46 +475,99 @@ function previewCard(){
 /* ============================================================
    VIEW MODE — the actual public digital card
    ============================================================ */
+function buildAvatar(d,cls){
+  const initial=esc((d.n||'?').trim().charAt(0)||'?');
+  if(d.img){
+    return `<img src="${esc(d.img)}" class="${cls} v-img" alt=""
+      onerror="this.outerHTML='&lt;div class=&quot;${cls}&quot;&gt;${initial}&lt;/div&gt;'">`;
+  }
+  return `<div class="${cls}">${initial}</div>`;
+}
 function renderView(d){
+  const m=d.m||'b';
+  applyTheme(m);
+  if(m==='s')return renderSocialView(d);
+  if(m==='k')return renderKidsView(d);
+  if(m==='h')return renderMedicalView(d);
+  return renderBusinessView(d);
+}
+function renderBusinessView(d){
   const app=document.getElementById('app');
-  const c=AVATAR_COLORS[d.av||0];
-  const initial=(d.n||'?')[0];
-
   let contacts=[];
   if(d.p)contacts.push(['📞','الاتصال',d.p,'tel:'+d.p.replace(/\s/g,'')]);
   if(d.w)contacts.push(['💬','واتساب',d.w,'https://wa.me/'+d.w.replace(/[^0-9]/g,'')]);
   if(d.e)contacts.push(['✉️','البريد الإلكتروني',d.e,'mailto:'+d.e]);
-  if(d.web)contacts.push(['🌐','الموقع',d.web,d.web.startsWith('http')?d.web:'https://'+d.web]);
-
-  let socials=[];
-  if(d.ig)socials.push(['📷','Instagram','https://instagram.com/'+d.ig.replace('@','')]);
-  if(d.li)socials.push(['💼','LinkedIn','https://linkedin.com/in/'+d.li.replace('@','')]);
-  if(d.tw)socials.push(['𝕏','X','https://x.com/'+d.tw.replace('@','')]);
-  if(d.tt)socials.push(['🎵','TikTok','https://tiktok.com/@'+d.tt.replace('@','')]);
+  if(d.web)contacts.push(['🌐','الموقع',d.web,normalizeUrl(d.web)]);
+  const socials=['ig','li','tw','tt'].filter(k=>d[k]).map(k=>[SOCIAL_ICONS[k],SOCIAL_LABELS[k],SOCIAL_LINKS[k](d[k])]);
 
   app.innerHTML=`
   <div class="vcard">
     <div class="vhero">
-      <div class="v-av" style="background:linear-gradient(135deg,${c[0]},${c[1]})">${initial}</div>
+      ${buildAvatar(d,'v-av')}
       <h1>${esc(d.n||'')}</h1>
       ${(d.t||d.c)?`<div class="vsub">${esc(d.t||'')}${d.t&&d.c?' · ':''}${esc(d.c||'')}</div>`:''}
       ${d.bio?`<div class="vbio">${esc(d.bio)}</div>`:''}
       <button class="save-btn" onclick="saveContact(${JSON.stringify(d).replace(/"/g,'&quot;')})">📥 حفظ جهة الاتصال</button>
     </div>
-
-    ${contacts.length?`<div class="contact-list">
-      ${contacts.map(([ic,label,val,href])=>`
-        <a class="c-row" href="${href}">
-          <div class="ci" style="background:rgba(47,212,184,.14)">${ic}</div>
-          <div class="ct"><b>${label}</b><span>${esc(val)}</span></div>
-        </a>`).join('')}
+    ${contacts.length?`<div class="contact-list">${contacts.map(([ic,label,val,href])=>`
+      <a class="c-row" href="${href}">
+        <div class="ci">${ic}</div>
+        <div class="ct"><b>${label}</b><span>${esc(val)}</span></div>
+      </a>`).join('')}</div>`:''}
+    ${socials.length?`<div class="social-grid">${socials.map(([ic,label,href])=>`
+      <a class="s-tile" href="${href}" target="_blank" rel="noopener"><span>${ic}</span><span>${label}</span></a>`).join('')}</div>`:''}
+    <div class="footer-note">بطاقة رقمية · Revo Card</div>
+  </div>`;
+}
+function renderSocialView(d){
+  const app=document.getElementById('app');
+  const socials=['ig','tt','sc','yt','tw','tg'].filter(k=>d[k]).map(k=>[SOCIAL_ICONS[k],SOCIAL_LABELS[k],SOCIAL_LINKS[k](d[k])]);
+  app.innerHTML=`
+  <div class="vcard">
+    <div class="vhero">
+      ${buildAvatar(d,'v-av')}
+      <h1>${esc(d.n||'')}</h1>
+      ${d.bio?`<div class="vbio">${esc(d.bio)}</div>`:''}
+    </div>
+    ${socials.length?`<div class="social-grid">${socials.map(([ic,label,href])=>`
+      <a class="s-tile s-tile-lg" href="${href}" target="_blank" rel="noopener"><span class="s-ic">${ic}</span><span>${label}</span></a>`).join('')}</div>`:''}
+    <div class="footer-note">بطاقة رقمية · Revo Card</div>
+  </div>`;
+}
+function renderKidsView(d){
+  const app=document.getElementById('app');
+  const guardianTel=d.gp?esc(d.gp.replace(/\s/g,'')):'';
+  app.innerHTML=`
+  <div class="vcard">
+    <div class="vhero">
+      ${buildAvatar(d,'v-av')}
+      <div class="kid-tag">بطاقة أمان الطفل</div>
+      <h1>${esc(d.n||'')}</h1>
+      ${d.bg?`<div class="badge-row"><span class="badge">🩸 ${esc(d.bg)}</span></div>`:''}
+      ${guardianTel?`<a class="cta-btn" href="tel:${guardianTel}"><span class="cta-ic">📞</span><span>اتصل بولي الأمر فورًا</span></a>`:''}
+      ${d.med?`<div class="vbio med-note"><b>معلومة طبية: </b>${esc(d.med)}</div>`:''}
+    </div>
+    <div class="safety-note">🛡️ هذا الطفل يحمل سوار Revo — اضغط الزر أعلاه للاتصال بولي أمره فورًا.</div>
+    <div class="footer-note">بطاقة رقمية · Revo Card</div>
+  </div>`;
+}
+function renderMedicalView(d){
+  const app=document.getElementById('app');
+  const epTel=d.ep?esc(d.ep.replace(/\s/g,'')):'';
+  app.innerHTML=`
+  <div class="vcard">
+    <div class="vhero">
+      ${d.img?buildAvatar(d,'v-av'):'<div class="med-cross">✚</div>'}
+      <h1>${esc(d.n||'')}</h1>
+      ${d.bg?`<div class="badge-row"><span class="badge">🩸 ${esc(d.bg)}</span></div>`:''}
+      ${epTel?`<a class="cta-btn" href="tel:${epTel}"><span class="cta-ic">📞</span><span>اتصال طارئ · ${esc(d.ep)}</span></a>`:''}
+    </div>
+    ${(d.all||d.cond||d.meds)?`<div class="med-info">
+      ${d.all?`<div class="med-block med-alert"><b>⚠️ حساسية من أدوية</b><p>${esc(d.all)}</p></div>`:''}
+      ${d.cond?`<div class="med-block"><b>الحالات الصحية المزمنة</b><p>${esc(d.cond)}</p></div>`:''}
+      ${d.meds?`<div class="med-block"><b>الأدوية الحالية</b><p>${esc(d.meds)}</p></div>`:''}
     </div>`:''}
-
-    ${socials.length?`<div class="social-grid">
-      ${socials.map(([ic,label,href])=>`
-        <a class="s-tile" href="${href}" target="_blank"><span>${ic}</span><span>${label}</span></a>`).join('')}
-    </div>`:''}
-
+    <button class="save-btn" onclick="saveContact(${JSON.stringify(d).replace(/"/g,'&quot;')})">📥 حفظ جهة اتصال الطوارئ</button>
     <div class="footer-note">بطاقة رقمية · Revo Card</div>
   </div>`;
 }
@@ -359,19 +578,31 @@ function renderEmpty(){
     <p>هذا الرابط غير صالح أو تالف.<br>تأكد من نسخه بالكامل بدون قص.</p>
   </div>`;
 }
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 /* vCard generation + download */
-function saveContact(d){
-  const lines=['BEGIN:VCARD','VERSION:3.0'];
-  lines.push('FN:'+(d.n||''));
-  if(d.c)lines.push('ORG:'+d.c);
-  if(d.t)lines.push('TITLE:'+d.t);
-  if(d.p)lines.push('TEL;TYPE=CELL:'+d.p);
-  if(d.e)lines.push('EMAIL:'+d.e);
-  if(d.web)lines.push('URL:'+(d.web.startsWith('http')?d.web:'https://'+d.web));
+function buildVCard(d){
+  const m=d.m||'b';
+  const lines=['BEGIN:VCARD','VERSION:3.0','FN:'+(d.n||'')];
+  if(m==='h'){
+    if(d.ep)lines.push('TEL;TYPE=CELL:'+d.ep);
+    const note=[];
+    if(d.bg)note.push('فصيلة الدم: '+d.bg);
+    if(d.all)note.push('حساسية: '+d.all);
+    if(d.cond)note.push('حالات مزمنة: '+d.cond);
+    if(d.meds)note.push('أدوية: '+d.meds);
+    if(note.length)lines.push('NOTE:'+note.join(' | '));
+  }else{
+    if(d.c)lines.push('ORG:'+d.c);
+    if(d.t)lines.push('TITLE:'+d.t);
+    if(d.p)lines.push('TEL;TYPE=CELL:'+d.p);
+    if(d.e)lines.push('EMAIL:'+d.e);
+    if(d.web)lines.push('URL:'+normalizeUrl(d.web));
+  }
   lines.push('END:VCARD');
-  const blob=new Blob([lines.join('\n')],{type:'text/vcard'});
+  return lines.join('\n');
+}
+function saveContact(d){
+  const blob=new Blob([buildVCard(d)],{type:'text/vcard'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.download=(d.n||'contact').replace(/\s/g,'_')+'.vcf';
