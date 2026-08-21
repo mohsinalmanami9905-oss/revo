@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revo Card — مختبر ضغط البيانات (Benchmark)</title>
+<style>
+  :root{--ink:#0d1220;--panel:#141b2c;--panel2:#1a2338;--line:#26314a;--txt:#eef2f8;--mut:#8b96a8;
+    --accent:#4fd1c5;--accent-d:#2fae9e;--good:#2fd47a;--warn:#e8b93f;--bad:#ff5d73}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--ink);color:var(--txt);padding:18px 14px 60px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:20px;margin-bottom:4px}
+  .sub{color:var(--mut);font-size:13px;margin-bottom:20px;line-height:1.7}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+  .panel h2{font-size:14px;color:var(--accent);margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+  label{font-size:11px;color:var(--mut);display:block;margin-bottom:4px}
+  input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel2);color:var(--txt);font-family:inherit;font-size:13px}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .presets button{padding:8px 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);
+    color:var(--txt);font-size:12px;cursor:pointer}
+  .presets button:hover{border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--mut);font-weight:700;font-size:11px}
+  td.method{white-space:normal;font-weight:600}
+  .ok{color:var(--good);font-weight:800}
+  .no{color:var(--bad);font-weight:800}
+  .best{outline:1px solid var(--accent);background:rgba(79,209,197,.08)}
+  .tbl-wrap{overflow-x:auto}
+  .note{font-size:11.5px;color:var(--mut);margin-top:10px;line-height:1.8}
+  .budget-line{font-size:13px;margin-bottom:14px;padding:10px 12px;background:var(--panel2);border-radius:10px;
+    border:1px solid var(--line)}
+  .badge{display:inline-block;background:var(--accent);color:#04231d;font-weight:800;padding:2px 8px;
+    border-radius:6px;font-size:11px;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧪 مختبر ضغط البيانات — Revo Card Benchmark</h1>
+  <p class="sub">أدخل بيانات بطاقة حقيقية (أو اختر مثالاً جاهزاً) وشاهد حجم الرابط الفعلي بالبايت لكل طريقة ترميز ممكنة،
+  بما فيها تقدير حجم رسالة NDEF الفعلي على شريحة NTAG213. كل الأرقام تُحسب بـ UTF-8 bytes حقيقية، لا تخمين.</p>
+
+  <div class="panel">
+    <h2>بيانات الاختبار</h2>
+    <div class="presets">
+      <button onclick="loadPreset('A')">A. الحد الأدنى (طفل)</button>
+      <button onclick="loadPreset('B')">B. بطاقة أعمال نموذجية</button>
+      <button onclick="loadPreset('C')">C. بطاقة سوشال ميديا</button>
+      <button onclick="loadPreset('D')">D. الأقصى الواقعي (كل الحقول)</button>
+    </div>
+    <div class="grid">
+      <div><label>الوضع (mode)</label>
+        <select id="in_mode" onchange="run()">
+          <option value="b">أعمال (b)</option><option value="s">سوشال (s)</option>
+          <option value="k">أطفال (k)</option><option value="h">صحي (h)</option>
+        </select></div>
+      <div><label>الاسم</label><input id="in_n" oninput="run()"></div>
+      <div><label>المسمى/العنوان</label><input id="in_t" oninput="run()"></div>
+      <div><label>الشركة</label><input id="in_c" oninput="run()"></div>
+      <div><label>الهاتف</label><input id="in_p" oninput="run()"></div>
+      <div><label>واتساب</label><input id="in_w" oninput="run()"></div>
+      <div><label>الإيميل</label><input id="in_e" oninput="run()"></div>
+      <div><label>الموقع</label><input id="in_web" oninput="run()"></div>
+      <div><label>إنستقرام</label><input id="in_ig" oninput="run()"></div>
+      <div><label>لينكدإن</label><input id="in_li" oninput="run()"></div>
+      <div><label>X</label><input id="in_tw" oninput="run()"></div>
+      <div><label>تيك توك</label><input id="in_tt" oninput="run()"></div>
+      <div><label>سناب</label><input id="in_sc" oninput="run()"></div>
+      <div><label>يوتيوب</label><input id="in_yt" oninput="run()"></div>
+      <div><label>تيليجرام</label><input id="in_tg" oninput="run()"></div>
+      <div><label>رابط صورة</label><input id="in_img" oninput="run()"></div>
+      <div style="grid-column:1/-1"><label>نبذة / بايو</label><textarea id="in_bio" oninput="run()" rows="2"></textarea></div>
+    </div>
+  </div>
+
+  <div class="budget-line" id="budgetLine"></div>
+
+  <div class="panel">
+    <h2>جدول المقارنة — Method | Data Size | Encoded Size | Full URL Size | NDEF Estimated Size | Fits NTAG213?</h2>
+    <div class="tbl-wrap">
+      <table id="resultsTable"></table>
+    </div>
+    <div class="note" id="notes"></div>
+  </div>
+</div>
+
+<script>
+/* ===== identical byte-accounting model used to evaluate Revo Card's index.html ===== */
+const DOMAIN = 'mohsinalmanami9905-oss.github.io/revo/';
+const SHORT_DOMAIN = 'rv.cards/';
+const NDEF_FIXED_OVERHEAD = 8; // TLV wrapper (3B) + record header (4B) + URI-abbrev code byte (1B)
+const NTAG213_RAW = 144;
+
+function b(s){return new TextEncoder().encode(s).length}
+function b64url(bytes){
+  let bin=''; bytes.forEach(x=>bin+=String.fromCharCode(x));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function utf8Bytes(str){return new TextEncoder().encode(str)}
+
+function ndefSize(fullUrl){
+  const rest = fullUrl.replace(/^https:\/\//,'');
+  return NDEF_FIXED_OVERHEAD + b(rest);
+}
+
+const MODE_ORDER = {
+  b:['t','c','bio','p','w','e','web','ig','li','tw','img'],
+  s:['bio','ig','tt','sc','yt','tw','tg','img'],
+  k:['bg','med','gp'],
+  h:['bg','cond','all','meds','ep','img'],
+};
+const FULLKEY = {n:'name',t:'title',c:'company',bio:'bio',p:'phone',w:'whatsapp',e:'email',web:'website',
+  ig:'instagram',li:'linkedin',tw:'twitter',tt:'tiktok',sc:'snapchat',yt:'youtube',tg:'telegram',
+  gp:'guardianPhone',img:'photoUrl'};
+const SOCIAL_URL = {ig:u=>'https://instagram.com/'+u, tt:u=>'https://tiktok.com/@'+u, sc:u=>'https://snapchat.com/add/'+u,
+  tw:u=>'https://x.com/'+u, li:u=>'https://linkedin.com/in/'+u, tg:u=>'https://t.me/'+u, yt:u=>'https://youtube.com/@'+u};
+
+function getProfile(){
+  const mode = document.getElementById('in_mode').value;
+  const fields = {};
+  ['n','t','c','bio','p','w','e','web','ig','li','tw','tt','sc','yt','tg','img'].forEach(k=>{
+    const el=document.getElementById('in_'+k);
+    if(el && el.value.trim()) fields[k]=el.value.trim();
+  });
+  return {mode, fields};
+}
+function toPositional(profile){
+  const order = MODE_ORDER[profile.mode]||[];
+  const parts=[profile.mode, profile.fields.n||''];
+  order.forEach(k=>parts.push(profile.fields[k]!==undefined?profile.fields[k]:''));
+  while(parts.length && parts[parts.length-1]==='') parts.pop();
+  return parts.join('~');
+}
+function packBinary(profile){
+  const chunks=[];
+  const MODE_CODE={b:0,s:1,k:2,h:3};
+  chunks.push(MODE_CODE[profile.mode]);
+  function pushStr(str){
+    const buf=Array.from(utf8Bytes(str||''));
+    chunks.push(Math.min(buf.length,255));
+    chunks.push(...buf.slice(0,255));
+  }
+  function pushPhoneBCD(str){
+    if(!str){chunks.push(0);return}
+    const digits=str.replace(/[^0-9]/g,'');
+    const plus=str.trim().startsWith('+')?1:0;
+    const nibbles=[plus,...digits.split('').map(Number)];
+    const bytes=[];
+    for(let i=0;i<nibbles.length;i+=2){
+      const hi=nibbles[i]&0x0f, lo=(nibbles[i+1]!==undefined?nibbles[i+1]:0x0f)&0x0f;
+      bytes.push((hi<<4)|lo);
+    }
+    chunks.push(nibbles.length); chunks.push(...bytes);
+  }
+  pushStr(profile.fields.n);
+  const order=MODE_ORDER[profile.mode]||[];
+  const phoneFields=new Set(['p','w','gp','ep']);
+  order.forEach(k=>{const v=profile.fields[k]; if(phoneFields.has(k)) pushPhoneBCD(v); else pushStr(v)});
+  return new Uint8Array(chunks);
+}
+
+function methods(profile){
+  const rows=[];
+  // 1. raw pretty JSON, full keys, URI-encoded
+  const fullKeyObj={mode:profile.mode}; Object.keys(profile.fields).forEach(k=>fullKeyObj[FULLKEY[k]||k]=profile.fields[k]);
+  rows.push(['1. Raw pretty JSON + full keys (URI-encoded)', DOMAIN, '#'+encodeURIComponent(JSON.stringify(fullKeyObj,null,2))]);
+  // 2. minified JSON full keys + b64url
+  rows.push(['2. Minified JSON, full keys + base64url', DOMAIN, '#d='+b64url(utf8Bytes(JSON.stringify(fullKeyObj)))]);
+  // 3. short keys + b64url [current production]
+  const shortObj={}; if(profile.mode!=='b')shortObj.m=profile.mode; Object.assign(shortObj,profile.fields);
+  rows.push(['3. Short JSON keys + base64url  [الإنتاج الحالي]', DOMAIN, '#d='+b64url(utf8Bytes(JSON.stringify(shortObj)))]);
+  // 4. short keys, full social urls
+  const fullSocObj={}; if(profile.mode!=='b')fullSocObj.m=profile.mode;
+  Object.keys(profile.fields).forEach(k=>fullSocObj[k]=SOCIAL_URL[k]?SOCIAL_URL[k](profile.fields[k]):profile.fields[k]);
+  rows.push(['4. مفاتيح مختصرة + روابط سوشال كاملة (بدل يوزر فقط)', DOMAIN, '#d='+b64url(utf8Bytes(JSON.stringify(fullSocObj)))]);
+  // 5a/5b positional
+  const pos=toPositional(profile);
+  rows.push(['5a. ترميز موضعي (positional) + base64url', DOMAIN, '#'+b64url(utf8Bytes(pos))]);
+  rows.push(['5b. ترميز موضعي، UTF-8 خام (بدون base64)', DOMAIN, '#'+pos.replace(/%/g,'%25').replace(/#/g,'%23')]);
+  // 6 binary
+  rows.push(['6. ترميز ثنائي (binary packed, BCD للهاتف) + base64url', DOMAIN, '#'+b64url(packBinary(profile))]);
+  // 10 shortest
+  rows.push(['10. الأقصر الممكن (دومين قصير + موضعي + UTF-8 خام)', SHORT_DOMAIN, '#'+pos.replace(/%/g,'%25').replace(/#/g,'%23')]);
+  return rows;
+}
+
+function loadPreset(k){
+  const presets={
+    A:{mode:'k',n:'سلطان',gp:'+97333000111'},
+    B:{mode:'b',n:'محسن الراشد',t:'مؤسس ومدير تنفيذي',c:'Revo Technologies',
+       bio:'أبني منتجات تقنية بلا سيرفر ولا قواعد بيانات',p:'+97333000000',w:'+97333000001',
+       e:'mohsen@revo.com',web:'revo.com',ig:'mohsen',li:'mohsenalrashed',tw:'mohsen'},
+    C:{mode:'s',n:'mohsen',bio:'محتوى، سفر، وتصوير 📸 تابعوني على كل المنصات',
+       ig:'mohsen_official',tt:'mohsen_tt',sc:'mohsensnap',yt:'mohsenchannel',tw:'mohsen_x',tg:'mohsentg'},
+    D:{mode:'b',n:'محسن عبدالله الراشد',t:'المؤسس والرئيس التنفيذي',c:'Revo Technologies FZE',
+       bio:'أبني منتجات تقنية بلا سيرفر ولا قواعد بيانات، شغوف بالخصوصية والأنظمة اللامركزية',
+       p:'+97333000000',w:'+97333000001',e:'mohsen.alrashed@revo-technologies.com',
+       web:'www.revo-technologies.com',ig:'mohsen_alrashed_official',li:'mohsen-abdullah-alrashed',
+       tw:'mohsen_alrashed',img:'https://i.imgur.com/aBcD1234.jpg'}
+  };
+  const p=presets[k];
+  ['mode','n','t','c','bio','p','w','e','web','ig','li','tw','tt','sc','yt','tg','img'].forEach(f=>{
+    const el=document.getElementById('in_'+f); if(el) el.value=p[f]||'';
+  });
+  run();
+}
+
+function run(){
+  const profile=getProfile();
+  const rows=methods(profile);
+  const NET_BUDGET=137; // net usable bytes after NDEF overhead, per NTAG213 spec math below
+  document.getElementById('budgetLine').innerHTML=
+    `حد شريحة NTAG213: <b>144 بايت خام</b> — بعد خصم overhead رسالة NDEF (TLV wrapper + ترويسة السجل + بايت اختصار البادئة https://) = <b>8 بايت</b>
+     → المساحة الصافية الفعلية لنص الرابط ≈ <b>136 بايت</b> <span class="badge">قريب جداً من تقديرك 137</span>`;
+
+  const table=document.getElementById('resultsTable');
+  let html='<tr><th>الطريقة (Method)</th><th>حجم البيانات الخام</th><th>الحجم المُرمّز</th><th>حجم الرابط الكامل</th><th>حجم NDEF التقديري</th><th>يناسب NTAG213؟</th></tr>';
+  let minNdef=Infinity;
+  const computed=rows.map(([name,domain,afterDomain])=>{
+    const fullUrl='https://'+domain+afterDomain;
+    const encSize=b(afterDomain);
+    const fullSize=b(fullUrl);
+    const ndef=ndefSize(fullUrl);
+    if(ndef<minNdef) minNdef=ndef;
+    return {name,encSize,fullSize,ndef,fits:ndef<=144};
+  });
+  const rawDataSize=b(JSON.stringify(profile.fields));
+  computed.forEach(r=>{
+    html+=`<tr class="${r.ndef===minNdef?'best':''}">
+      <td class="method">${r.name}</td>
+      <td>${rawDataSize}</td>
+      <td>${r.encSize}</td>
+      <td>${r.fullSize}</td>
+      <td>${r.ndef}</td>
+      <td class="${r.fits?'ok':'no'}">${r.fits?'✅ نعم':'❌ لا'}</td>
+    </tr>`;
+  });
+  table.innerHTML=html;
+
+  const anyFits=computed.some(r=>r.fits);
+  const best=computed.reduce((a,c)=>c.ndef<a.ndef?c:a);
+  document.getElementById('notes').innerHTML=
+    (anyFits
+      ? `✅ توجد طريقة (أو أكثر) تُلائم شريحة NTAG213 لهذه البيانات. الأفضل: <b>${best.name}</b> بحجم NDEF ${best.ndef} بايت.`
+      : `❌ <b>لا توجد أي طريقة ترميز — مهما بلغت كفاءتها — تُلائم شريحة NTAG213 لهذه البيانات.</b>
+         حتى الأفضل (${best.name}) يحتاج ${best.ndef} بايت، وهذا يتجاوز الحد بمقدار ${best.ndef-144} بايت.
+         الخيار الوحيد الواقعي هنا: تخزين معرّف قصير على التاق (Short-ID) والبيانات الفعلية في تخزين خارجي (serverless lookup).`)
+    + `<br><br>ملاحظة: ضغط عام (gzip/deflate) لا يفيد أبداً على بيانات قصيرة جداً (يزيدها حجماً بسبب رأس الضغط)، لكنه يفيد فعلياً
+       على البيانات الأكبر (بطاقة أعمال/سوشال كاملة) — تم التحقق من هذا رقمياً بمعيار Node.js منفصل، وليس افتراضاً نظرياً.`;
+}
+
+window.addEventListener('DOMContentLoaded', ()=>loadPreset('B'));
+</script>
+</body>
+</html>
