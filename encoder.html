@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revo — برمجة التاقات بالجملة</title>
+<style>
+  :root{
+    --ink:#141b19;--panel:#1c2422;--panel2:#212a27;--line:#313c38;
+    --txt:#f4f7f5;--mut:#8fa39c;--accent:#35d999;--accent-d:#1fae7c;--accent-ink:#062318;
+    --accent-rgb:53,217,153;--warn:#e8b93f;--danger:#ff5d73;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--ink);
+    color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 18px 70px}
+  .en{direction:ltr;unicode-bidi:embed}
+  svg{display:block}
+
+  h1{font-size:21px;font-weight:800;margin-bottom:5px}
+  .sub{font-size:13px;color:var(--mut);line-height:1.7;margin-bottom:22px}
+  .badge-internal{display:inline-block;background:rgba(232,185,63,.14);border:1px solid rgba(232,185,63,.4);
+    color:var(--warn);font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+  .card h2{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--accent);font-weight:800;margin-bottom:14px}
+  .step-n{width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+    display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0}
+
+  .warn{display:flex;gap:11px;background:#3a2a10;border:1px solid #6b4d18;color:#f0c987;border-radius:13px;
+    padding:14px 15px;font-size:12.5px;line-height:1.8;margin-bottom:18px}
+  .warn b{color:#ffd88a}
+
+  label{display:block;font-size:11.5px;color:var(--mut);font-weight:700;margin-bottom:6px}
+  input,select{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;background:var(--panel2);
+    color:var(--txt);font-family:inherit;font-size:13.5px;outline:none}
+  input:focus,select:focus{border-color:var(--accent)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:150px}
+  .field{margin-bottom:13px}
+  .hint{font-size:10.5px;color:var(--mut);margin-top:6px;line-height:1.6}
+
+  .preview{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 13px;
+    font-size:12px;word-break:break-all;line-height:1.7;margin-top:4px}
+  .preview b{color:var(--accent)}
+  .bytes{font-size:11px;margin-top:8px;font-weight:700}
+  .bytes.ok{color:var(--accent)} .bytes.bad{color:var(--danger)}
+
+  .btn{padding:14px 18px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;
+    font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px}
+  .btn-main{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:var(--accent-ink);width:100%}
+  .btn-main:active{transform:scale(.99)}
+  .btn-main:disabled{opacity:.4;cursor:not-allowed}
+  .btn-ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+  .btn-row{display:flex;gap:9px;flex-wrap:wrap}
+  .btn-row .btn{flex:1;min-width:140px}
+
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--mut);font-size:10.5px;font-weight:800}
+  td.done{color:var(--accent)}
+  .tbl-wrap{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:11px}
+
+  .counter{text-align:center;padding:10px 0 18px}
+  .counter .big{font-size:40px;font-weight:800;line-height:1}
+  .counter .big span{color:var(--mut);font-size:22px}
+  .counter .lbl{font-size:12px;color:var(--mut);margin-top:6px}
+  .cur-url{background:var(--panel2);border:1px solid var(--accent);border-radius:11px;padding:13px;
+    font-size:13px;word-break:break-all;margin-bottom:12px;color:var(--accent);text-align:center}
+
+  .hidden{display:none}
+  .ok-note{display:flex;gap:9px;background:rgba(var(--accent-rgb),.09);border:1px solid rgba(var(--accent-rgb),.35);
+    border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.7;color:var(--txt);margin-top:12px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);
+    color:var(--accent-ink);padding:13px 22px;border-radius:13px;font-weight:700;font-size:13px;opacity:0;
+    transition:.3s;z-index:200;max-width:88%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge-internal">أداة داخلية — ليست للعملاء</div>
+  <h1>برمجة تاقات Revo بالجملة</h1>
+  <p class="sub">تولّد معرّفات فريدة لكل تاق، وتصدّرها كملف CSV تستورده في تطبيق كتابة NFC بالجملة على الآيفون —
+  أو تكتبها مباشرة هنا إذا كنت على أندرويد.</p>
+
+  <div class="warn">
+    <div style="flex-shrink:0;color:var(--warn)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.5 18a1.8 1.8 0 0 0 1.6 2.7h15.8a1.8 1.8 0 0 0 1.6-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg>
+    </div>
+    <div><b>اقرأ هذا قبل برمجة أول تاق.</b> ما يُكتب على التاق دائم عمليًا — لو برمجت ٥٠٠ تاق بعنوان اليوم
+    ثم انتقلت لدومين خاص، ستضطر لإعادة برمجتهم كلهم واحدًا واحدًا.
+    <b>قرّر عنوانك النهائي أولًا</b>، وإذا كنت تنوي شراء دومين قصير فاشتره قبل أن تبدأ.</div>
+  </div>
+
+  <!-- 1. settings -->
+  <div class="card">
+    <h2><span class="step-n">1</span> إعدادات الدفعة</h2>
+    <div class="field">
+      <label>العنوان الأساسي النهائي</label>
+      <input id="baseUrl" class="en" dir="ltr" value="https://mohsinalmanami9905-oss.github.io/revo/#c=" oninput="refreshPreview()">
+      <div class="hint">المعرّف الفريد يُلحق مباشرة بنهاية هذا النص. مثال بدومين خاص: <span class="en">https://revo.link/</span></div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>عدد التاقات في هذه الدفعة</label>
+        <input id="qty" type="number" min="1" max="2000" value="50" oninput="refreshPreview()">
+      </div>
+      <div class="field">
+        <label>طول المعرّف</label>
+        <select id="idLen" onchange="refreshPreview()">
+          <option value="5">5 خانات (≈33 مليون احتمال)</option>
+          <option value="6" selected>6 خانات (≈1 مليار احتمال)</option>
+          <option value="7">7 خانات (≈34 مليار احتمال)</option>
+        </select>
+      </div>
+    </div>
+    <div class="preview" id="urlPreview"></div>
+    <div class="bytes" id="byteNote"></div>
+  </div>
+
+  <!-- 2. generate -->
+  <div class="card">
+    <h2><span class="step-n">2</span> توليد الدفعة</h2>
+    <button class="btn btn-main" onclick="generateBatch()">ولّد المعرّفات</button>
+    <div id="batchInfo" class="hidden">
+      <div class="ok-note" id="batchSummary"></div>
+      <div class="btn-row" style="margin-top:13px">
+        <button class="btn btn-ghost" onclick="downloadCsv()">تحميل CSV للآيفون</button>
+        <button class="btn btn-ghost" onclick="downloadTxt()">تحميل قائمة روابط (TXT)</button>
+        <button class="btn btn-ghost" onclick="downloadClaims()">تحميل أكواد التفعيل</button>
+      </div>
+      <div class="hint" style="margin-top:10px">ملف CSV يحتوي عمود الروابط للاستيراد في تطبيق الكتابة بالجملة.
+      أكواد التفعيل تُطبع على العبوة ولا تُكتب على التاق — هي ما يمنع شخصًا آخر من تفعيل بطاقة زبونك.</div>
+    </div>
+  </div>
+
+  <!-- 3. write -->
+  <div class="card" id="writeCard">
+    <h2><span class="step-n">3</span> الكتابة على التاقات</h2>
+    <div id="nfcYes" class="hidden">
+      <div class="counter">
+        <div class="big"><span id="doneN">0</span><span> / <span id="totalN">0</span></span></div>
+        <div class="lbl">تاق تمت برمجته</div>
+      </div>
+      <div class="cur-url en" id="curUrl"></div>
+      <button class="btn btn-main" id="writeBtn" onclick="writeNext()">اكتب التاق التالي</button>
+      <div class="hint" style="text-align:center;margin-top:10px">بعد الضغط، قرّب التاق من ظهر الهاتف. ينتقل للتالي تلقائيًا.</div>
+    </div>
+    <div id="nfcNo" class="hidden">
+      <div class="ok-note">
+        <div>
+          هذا الجهاز لا يكتب NFC من المتصفح (آيفون أو حاسوب)، وهذا طبيعي.<br><br>
+          <b>الطريقة على الآيفون:</b><br>
+          ١. حمّل تطبيق يدعم الكتابة بالجملة من CSV<br>
+          ٢. حمّل ملف CSV من الخطوة السابقة وانقله للآيفون<br>
+          ٣. استورده بالتطبيق واختر وضع الكتابة المتسلسلة<br>
+          ٤. المس التاقات واحدًا بعد الآخر — كل تاق يأخذ الرابط التالي بالقائمة<br><br>
+          <b>أسرع بديل:</b> أي هاتف أندرويد رخيص + هذه الصفحة نفسها = كتابة مباشرة بضغطة لكل تاق.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. table -->
+  <div class="card hidden" id="tableCard">
+    <h2><span class="step-n">4</span> سجل الدفعة</h2>
+    <div class="tbl-wrap">
+      <table id="batchTable"></table>
+    </div>
+    <div class="btn-row" style="margin-top:13px">
+      <button class="btn btn-ghost" onclick="resetBatch()">مسح الدفعة والبدء من جديد</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ALPHABET='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0 or I/1
+const LS_KEY='revo_batch_v1';
+const NFC_SUPPORTED=('NDEFReader' in window);
+let batch=null; // {base, ids:[{id,claim,written}], createdAt}
+
+let toastT;
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
+
+function randStr(len,alpha){
+  const a=new Uint8Array(len);crypto.getRandomValues(a);
+  let s='';for(let i=0;i<len;i++)s+=alpha[a[i]%alpha.length];
+  return s;
+}
+function byteLen(s){return new TextEncoder().encode(s).length}
+function ndefBytes(url){
+  // TLV wrapper 3B + record header 4B + URI-abbreviation byte 1B, with "https://" folded into that byte
+  return 8+byteLen(url.replace(/^https:\/\//,''));
+}
+
+function refreshPreview(){
+  const base=document.getElementById('baseUrl').value.trim();
+  const len=parseInt(document.getElementById('idLen').value,10);
+  const sample=base+randStr(len,ALPHABET);
+  document.getElementById('urlPreview').innerHTML='شكل الرابط على كل تاق: <b class="en">'+sample+'</b>';
+  const nb=ndefBytes(sample);
+  const el=document.getElementById('byteNote');
+  const fits=nb<=144;
+  el.className='bytes '+(fits?'ok':'bad');
+  el.textContent=(fits?'✓ ':'✗ ')+nb+' بايت على شريحة NTAG213 (الحد 144) — '+(fits?('متبقٍ '+(144-nb)+' بايت'):'تجاوز الحد، اختصر العنوان');
+}
+
+function generateBatch(){
+  const base=document.getElementById('baseUrl').value.trim();
+  const qty=Math.max(1,Math.min(2000,parseInt(document.getElementById('qty').value,10)||0));
+  const len=parseInt(document.getElementById('idLen').value,10);
+  if(!base){toast('أدخل العنوان الأساسي أولًا');return}
+  const seen=new Set(), ids=[];
+  while(ids.length<qty){
+    const id=randStr(len,ALPHABET);
+    if(seen.has(id))continue;      // collisions are astronomically unlikely, but cheap to rule out
+    seen.add(id);
+    ids.push({id, claim:randStr(6,ALPHABET), written:false});
+  }
+  batch={base, ids, createdAt:Date.now()};
+  save(); render();
+  toast('تم توليد '+qty+' معرّف');
+}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(batch))}catch(e){}}
+function load(){
+  try{const raw=localStorage.getItem(LS_KEY);if(raw)batch=JSON.parse(raw)}catch(e){batch=null}
+}
+function urlOf(rec){return batch.base+rec.id}
+function nextUnwritten(){return batch?batch.ids.find(r=>!r.written):null}
+
+function render(){
+  if(!batch)return;
+  document.getElementById('batchInfo').classList.remove('hidden');
+  document.getElementById('tableCard').classList.remove('hidden');
+  const done=batch.ids.filter(r=>r.written).length;
+  document.getElementById('batchSummary').innerHTML=
+    '<div>دفعة من <b>'+batch.ids.length+'</b> تاق · تمت برمجة <b>'+done+'</b> · متبقٍ <b>'+(batch.ids.length-done)+'</b>'+
+    '<br><span style="color:var(--mut);font-size:11px">الدفعة محفوظة في هذا المتصفح — تقدر تغلق الصفحة وتكمل لاحقًا.</span></div>';
+
+  document.getElementById('doneN').textContent=done;
+  document.getElementById('totalN').textContent=batch.ids.length;
+  document.getElementById(NFC_SUPPORTED?'nfcYes':'nfcNo').classList.remove('hidden');
+  const nxt=nextUnwritten();
+  if(NFC_SUPPORTED){
+    document.getElementById('curUrl').textContent=nxt?urlOf(nxt):'— اكتملت الدفعة —';
+    document.getElementById('writeBtn').disabled=!nxt;
+  }
+
+  let html='<tr><th>#</th><th>المعرّف</th><th>كود التفعيل</th><th>الحالة</th></tr>';
+  batch.ids.forEach((r,i)=>{
+    html+='<tr><td>'+(i+1)+'</td><td class="en">'+r.id+'</td><td class="en">'+r.claim+'</td>'+
+      '<td class="'+(r.written?'done':'')+'">'+(r.written?'✓ مبرمج':'—')+'</td></tr>';
+  });
+  document.getElementById('batchTable').innerHTML=html;
+}
+
+async function writeNext(){
+  const rec=nextUnwritten();
+  if(!rec){toast('اكتملت الدفعة');return}
+  const btn=document.getElementById('writeBtn');
+  const orig=btn.textContent;
+  btn.disabled=true; btn.textContent='قرّب التاق الآن...';
+  try{
+    const ndef=new NDEFReader();
+    await ndef.write({records:[{recordType:'url',data:urlOf(rec)}]});
+    rec.written=true; save(); render();
+    toast('✓ تاق رقم '+batch.ids.filter(r=>r.written).length+' تمت برمجته');
+  }catch(e){
+    const n=e&&e.name;
+    toast(n==='NotAllowedError'?'لم يُسمح باستخدام NFC — فعّله من الإعدادات'
+      :n==='NotReadableError'?'NFC مغلق بالهاتف'
+      :n==='NetworkError'?'ابتعد التاق — أعد المحاولة'
+      :'تعذّرت الكتابة — تأكد أن التاق فارغ وغير مقفول');
+  }finally{
+    btn.textContent=orig;
+    btn.disabled=!nextUnwritten();
+  }
+}
+
+function dl(name,text,mime){
+  const blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function stamp(){return new Date(batch.createdAt).toISOString().slice(0,10)}
+function downloadCsv(){
+  if(!batch)return;
+  // BOM so Excel/Numbers open it as UTF-8
+  const rows=['url'].concat(batch.ids.map(r=>urlOf(r)));
+  dl('revo-tags-'+stamp()+'.csv','﻿'+rows.join('\r\n'),'text/csv;charset=utf-8');
+  toast('تم تحميل CSV');
+}
+function downloadTxt(){
+  if(!batch)return;
+  dl('revo-tags-'+stamp()+'.txt',batch.ids.map(r=>urlOf(r)).join('\n'));
+  toast('تم تحميل قائمة الروابط');
+}
+function downloadClaims(){
+  if(!batch)return;
+  const rows=['id,claim_code,url'].concat(batch.ids.map(r=>r.id+','+r.claim+','+urlOf(r)));
+  dl('revo-claim-codes-'+stamp()+'.csv','﻿'+rows.join('\r\n'),'text/csv;charset=utf-8');
+  toast('تم تحميل أكواد التفعيل — احفظها بمكان آمن');
+}
+function resetBatch(){
+  if(!confirm('سيتم مسح الدفعة الحالية وسجل ما تمت برمجته. متأكد؟'))return;
+  batch=null;
+  try{localStorage.removeItem(LS_KEY)}catch(e){}
+  location.reload();
+}
+
+load();
+refreshPreview();
+if(batch){
+  document.getElementById('baseUrl').value=batch.base;
+  document.getElementById('qty').value=batch.ids.length;
+  render();
+}else{
+  document.getElementById(NFC_SUPPORTED?'nfcYes':'nfcNo').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
