@@ -2656,6 +2656,12 @@ const STR = {
     nfcCancelled:'تم الإلغاء', nfcGenericErr:'تعذّرت العملية — تأكد أن التاق فارغ وقابل للكتابة',
     nfcReadErr:'تعذّرت قراءة التاق', nfcEmptyTag:'التاق فارغ أو لا يحتوي رابطًا',
     nfcTagContent:'محتوى التاق:', nfcOpenLink:'فتح الرابط',
+    buddyTitle:'آيفون؟ اكتب التاق عبر أي هاتف أندرويد قريب',
+    buddyNote:'الآيفون لا يسمح لأي متصفح بالكتابة على التاقات (قيد من آبل). امسح هذا الرمز بكاميرا أي هاتف أندرويد — صاحبك، زميلك، أو جهاز المحل — ويكتب لك التاق بضغطة واحدة.',
+    buddyShow:'اعرض رمز الكتابة', buddyHide:'إخفاء',
+    buddyScreenTitle:'اكتب تاق Revo', buddyScreenSub:'قرّب التاق من هذا الهاتف بعد الضغط على الزر',
+    buddyWriteBtn:'اكتب على التاق الآن', buddyNoSupport:'هذا الهاتف أيضًا لا يدعم الكتابة — تحتاج هاتف أندرويد بمتصفح Chrome',
+    buddyPrivacy:'لا تُنقل أي بيانات شخصية — فقط معرّف البطاقة العلني الذي سيُكتب على التاق',
   },
   en:{ dir:'ltr', tagline:'CONNECT MORE',
     stepLabel:'Step one', pickTitle:'Choose your card type',
@@ -2711,6 +2717,12 @@ const STR = {
     nfcCancelled:'Cancelled', nfcGenericErr:'That didn\'t work — make sure the tag is blank and writable',
     nfcReadErr:'Couldn\'t read the tag', nfcEmptyTag:'The tag is empty or has no link on it',
     nfcTagContent:'Tag contents:', nfcOpenLink:'Open link',
+    buddyTitle:'On iPhone? Write the tag with any Android phone nearby',
+    buddyNote:'iPhone does not let any browser write NFC tags (an Apple restriction). Scan this code with any Android phone\'s camera — a friend, a colleague, or the shop\'s device — and it writes your tag in one tap.',
+    buddyShow:'Show the writing code', buddyHide:'Hide',
+    buddyScreenTitle:'Write a Revo tag', buddyScreenSub:'Hold the tag to this phone after pressing the button',
+    buddyWriteBtn:'Write to the tag now', buddyNoSupport:'This phone can\'t write tags either — you need an Android phone with Chrome',
+    buddyPrivacy:'No personal data is transferred — only the public card ID that gets written to the tag',
   }
 };
 function t(k){ return (STR[LANG] && STR[LANG][k]!=null) ? STR[LANG][k] : k }
@@ -3181,6 +3193,53 @@ function renderGuideStandalone(){
   </div>`;
 }
 
+/* ============================================================
+   Write-buddy handoff
+   ------------------------------------------------------------
+   iOS cannot write tags from any browser, so instead of dead-ending
+   there we hand the job to a nearby Android phone: the iPhone shows
+   a QR holding #w=<shortId>, any Android camera opens it, and that
+   phone writes the tag. Only the public card ID travels — the same
+   opaque id that ends up printed on the tag anyway — so there is no
+   personal data in the handoff.
+   ============================================================ */
+function renderWriteBuddy(shortId){
+  const viewUrl=location.origin+location.pathname+'#c='+shortId;
+  window._lastViewUrl=viewUrl;
+  document.getElementById('app').innerHTML=`
+  ${heroHTML()}
+  <div class="wrap">
+    <div class="fhead" style="padding-top:10px;text-align:center">
+      <h1>${t('buddyScreenTitle')}</h1>
+      <p>${t('buddyScreenSub')}</p>
+    </div>
+    <div class="card-box" style="text-align:center">
+      <div class="link-row en" style="margin-bottom:14px">${esc(viewUrl)}</div>
+      ${NFC_SUPPORTED
+        ? `<button class="btn btn-main" onclick="writeTagDirect()">${svgIcon('nfc',{size:17,sw:1.9})}${t('buddyWriteBtn')}</button>`
+        : `<div class="warn-box" style="margin:0">${svgIcon('warn',{size:14,sw:2})}<span>${t('buddyNoSupport')}</span></div>`}
+    </div>
+    <div class="footer-note">
+      <img class="fmark-img" src="${LOGO_MARK}" alt="Revo">
+      <div class="fsub">${t('buddyPrivacy')}</div>
+    </div>
+  </div>`;
+}
+function toggleBuddyQr(){
+  const box=document.getElementById('buddyQrBox');
+  const btn=document.getElementById('buddyToggleBtn');
+  if(!box)return;
+  const showing=box.classList.toggle('show');
+  if(showing && !box.dataset.done){
+    const id=(window._lastViewUrl||'').split('#c=')[1]||'';
+    const handoff=location.origin+location.pathname+'#w='+id;
+    box.innerHTML=`<div class="qr-wrap" style="margin-bottom:10px">${qrSvg(handoff,{cell:7,margin:14})}</div>
+      <div class="link-row en">${esc(handoff)}</div>`;
+    box.dataset.done='1';
+  }
+  btn.textContent=showing?t('buddyHide'):t('buddyShow');
+}
+
 /* ---- router ---- */
 let editState=null; // {shortId, editToken} once a card has been created or opened for editing
 async function boot(){
@@ -3198,6 +3257,10 @@ async function boot(){
     const data=await Backend.load(shortId);
     if(data) return renderView(data);
     return renderNotFoundLocal(shortId);
+  }
+  if(hash.startsWith('#w=')){
+    applyTheme('b');
+    return renderWriteBuddy(hash.slice(3));
   }
   if(hash.startsWith('#edit=')){
     const editToken=hash.slice(6);
@@ -3503,6 +3566,12 @@ function showResult(viewUrl,editUrl){
         <a class="btn btn-ghost" href="${viewUrl}" target="_blank" rel="noopener">${iconForward({size:14,sw:2})}${t('preview')}</a>
       </div>
     </div>
+    ${!NFC_SUPPORTED?`<div class="result-section">
+      <h4>${svgIcon('nfc',{size:14,sw:1.9})}${t('buddyTitle')}</h4>
+      <p style="font-size:11.5px;color:var(--mut);line-height:1.7;margin-bottom:11px">${t('buddyNote')}</p>
+      <button class="btn btn-ghost" id="buddyToggleBtn" style="margin-top:0" onclick="toggleBuddyQr()">${t('buddyShow')}</button>
+      <div id="buddyQrBox" class="nfc-read-out" style="border:none;background:none;padding:0;margin-top:12px"></div>
+    </div>`:''}
     ${NFC_SUPPORTED?`<div class="result-section">
       <h4>${svgIcon('nfc',{size:14,sw:1.9})}${t('writeDirectTitle')}</h4>
       <button class="btn btn-main" onclick="writeTagDirect()">${svgIcon('nfc',{size:17,sw:1.9})}${t('writeDirectBtn')}</button>
