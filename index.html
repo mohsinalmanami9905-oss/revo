@@ -232,6 +232,24 @@
   .not-found-box h1{font-size:18px;margin-bottom:10px;font-weight:800}
   .not-found-box p{color:var(--mut);font-size:13px;line-height:1.8;margin-bottom:18px}
 
+  /* ===== Direct NFC read/write overlay (Android Web NFC) ===== */
+  .nfc-overlay{position:fixed;inset:0;z-index:300;background:rgba(10,15,14,.9);display:none;
+    align-items:center;justify-content:center;padding:24px}
+  .nfc-overlay.show{display:flex}
+  .nfc-card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:28px 24px;
+    max-width:330px;width:100%;text-align:center}
+  .nfc-pulse{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;background:rgba(var(--accent-rgb),.14);
+    display:flex;align-items:center;justify-content:center;color:var(--accent);position:relative}
+  .nfc-pulse::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);
+    animation:nfcPulse 1.6s ease-out infinite}
+  @keyframes nfcPulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+  .nfc-card h3{font-size:17px;font-weight:800;margin-bottom:7px}
+  .nfc-card p{font-size:12.5px;color:var(--mut);line-height:1.7}
+  .nfc-read-out{display:none;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 12px;font-size:11.5px;word-break:break-all;color:var(--accent);margin-top:14px;line-height:1.6}
+  .nfc-read-out.show{display:block}
+  .write-note{font-size:10.5px;color:var(--mut);text-align:center;margin-top:9px;line-height:1.6}
+
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);
     color:var(--accent-ink);padding:13px 22px;border-radius:13px;font-weight:700;font-size:13px;opacity:0;transition:.3s;
     z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.35);max-width:88%;text-align:center;display:flex;align-items:center;gap:8px}
@@ -241,6 +259,15 @@
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
+<div class="nfc-overlay" id="nfcOverlay">
+  <div class="nfc-card">
+    <div class="nfc-pulse" id="nfcPulse"></div>
+    <h3 id="nfcTitle"></h3>
+    <p id="nfcBody"></p>
+    <div class="nfc-read-out" id="nfcReadOut"></div>
+    <button class="btn btn-ghost" id="nfcCancelBtn" onclick="cancelNfc()"></button>
+  </div>
+</div>
 
 <script>
 //---------------------------------------------------------------------
@@ -2616,6 +2643,19 @@ const STR = {
     medAllergy:'⚠️ حساسية من أدوية', medCond:'الحالات الصحية المزمنة', medMeds:'الأدوية الحالية', medInfo:'معلومة طبية: ',
     kidsSafety:'هذا الطفل يحمل سوار Revo — اضغط الزر أعلاه للاتصال بولي أمره فورًا.',
     downloadOn:'Download on', getItOn:'Get it on', appStore:'App Store', googlePlay:'Google Play',
+    writeDirectTitle:'اكتب على التاق مباشرة', writeDirectBtn:'اكتب على تاق NFC الآن',
+    writeDirectNote:'بدون أي تطبيق — يعمل على أندرويد (Chrome / Samsung Internet)',
+    guideAltTitle:'أو اكتبه يدويًا عبر تطبيق', readTagEntry:'اقرأ تاق NFC موجود',
+    nfcTapTitle:'قرّب التاق من الهاتف', nfcTapBody:'ضع تاق Revo على ظهر هاتفك وثبّته حتى تكتمل الكتابة',
+    nfcReadTitle:'قرّب التاق لقراءته', nfcReadBody:'ضع أي تاق NFC على ظهر هاتفك لعرض محتواه',
+    nfcCancel:'إلغاء', nfcOk:'تمت الكتابة على التاق بنجاح ✅',
+    nfcPermDenied:'لم يُسمح باستخدام NFC — فعّله من إعدادات الهاتف والمتصفح',
+    nfcUnsupported:'متصفحك لا يدعم الكتابة المباشرة — استخدم تطبيق NFC Tools',
+    nfcHwOff:'NFC مغلق بالهاتف — فعّله من الإعدادات وحاول مجددًا',
+    nfcMoved:'ابتعد التاق قبل اكتمال العملية — حاول مرة ثانية',
+    nfcCancelled:'تم الإلغاء', nfcGenericErr:'تعذّرت العملية — تأكد أن التاق فارغ وقابل للكتابة',
+    nfcReadErr:'تعذّرت قراءة التاق', nfcEmptyTag:'التاق فارغ أو لا يحتوي رابطًا',
+    nfcTagContent:'محتوى التاق:', nfcOpenLink:'فتح الرابط',
   },
   en:{ dir:'ltr', tagline:'CONNECT MORE',
     stepLabel:'Step one', pickTitle:'Choose your card type',
@@ -2658,6 +2698,19 @@ const STR = {
     medAllergy:'⚠️ Drug allergies', medCond:'Chronic conditions', medMeds:'Current medications', medInfo:'Medical note: ',
     kidsSafety:'This kid wears a Revo band — tap the button above to call their guardian immediately.',
     downloadOn:'Download on', getItOn:'Get it on', appStore:'App Store', googlePlay:'Google Play',
+    writeDirectTitle:'Write to the tag directly', writeDirectBtn:'Write to NFC tag now',
+    writeDirectNote:'No app needed — works on Android (Chrome / Samsung Internet)',
+    guideAltTitle:'Or write it manually with an app', readTagEntry:'Read an existing NFC tag',
+    nfcTapTitle:'Hold the tag to your phone', nfcTapBody:'Place your Revo tag against the back of your phone and hold it until writing finishes',
+    nfcReadTitle:'Hold a tag to read it', nfcReadBody:'Place any NFC tag against the back of your phone to see what\'s on it',
+    nfcCancel:'Cancel', nfcOk:'Tag written successfully ✅',
+    nfcPermDenied:'NFC permission denied — enable it in your phone and browser settings',
+    nfcUnsupported:'Your browser can\'t write tags directly — use the NFC Tools app',
+    nfcHwOff:'NFC is turned off on your phone — enable it in settings and try again',
+    nfcMoved:'The tag moved before the operation finished — try again',
+    nfcCancelled:'Cancelled', nfcGenericErr:'That didn\'t work — make sure the tag is blank and writable',
+    nfcReadErr:'Couldn\'t read the tag', nfcEmptyTag:'The tag is empty or has no link on it',
+    nfcTagContent:'Tag contents:', nfcOpenLink:'Open link',
   }
 };
 function t(k){ return (STR[LANG] && STR[LANG][k]!=null) ? STR[LANG][k] : k }
@@ -2981,6 +3034,108 @@ function downloadQrPng(svgString,filename){
 }
 
 /* ============================================================
+   Direct NFC read/write (Web NFC)
+   ------------------------------------------------------------
+   Supported on Chromium-based Android browsers only (Chrome 89+,
+   Samsung Internet 15+, Opera Mobile 64+). Safari/iOS does not
+   implement Web NFC at all — NDEFReader is simply undefined there,
+   so on iPhone we fall back to the NFC Tools app guide, which is
+   why that guide stays in the product.
+   ============================================================ */
+const NFC_SUPPORTED = (typeof window!=='undefined' && 'NDEFReader' in window);
+let nfcAbort=null;
+
+function showNfcOverlay(title,body){
+  document.getElementById('nfcPulse').innerHTML=svgIcon('nfc',{size:36,sw:1.6});
+  document.getElementById('nfcTitle').textContent=title;
+  document.getElementById('nfcBody').textContent=body;
+  const out=document.getElementById('nfcReadOut');
+  out.classList.remove('show'); out.innerHTML='';
+  document.getElementById('nfcCancelBtn').textContent=t('nfcCancel');
+  document.getElementById('nfcOverlay').classList.add('show');
+}
+function hideNfcOverlay(){document.getElementById('nfcOverlay').classList.remove('show')}
+function cancelNfc(){
+  if(nfcAbort){try{nfcAbort.abort()}catch(e){}nfcAbort=null}
+  hideNfcOverlay();
+}
+function nfcErrMsg(e){
+  const n=e&&e.name;
+  if(n==='AbortError') return t('nfcCancelled');
+  if(n==='NotAllowedError') return t('nfcPermDenied');
+  if(n==='NotSupportedError') return t('nfcUnsupported');
+  if(n==='NotReadableError') return t('nfcHwOff');
+  if(n==='NetworkError') return t('nfcMoved');
+  return t('nfcGenericErr');
+}
+async function writeTagDirect(){
+  const url=window._lastViewUrl;
+  if(!url) return;
+  if(!NFC_SUPPORTED){toast(t('nfcUnsupported'));return}
+  nfcAbort=new AbortController();
+  showNfcOverlay(t('nfcTapTitle'),t('nfcTapBody'));
+  try{
+    const ndef=new NDEFReader();
+    await ndef.write({records:[{recordType:'url',data:url}]},{signal:nfcAbort.signal});
+    nfcAbort=null;
+    hideNfcOverlay();
+    toast(t('nfcOk'));
+  }catch(e){
+    nfcAbort=null;
+    hideNfcOverlay();
+    toast(nfcErrMsg(e));
+  }
+}
+function decodeNdefRecord(rec){
+  try{
+    if(rec.recordType==='url'||rec.recordType==='absolute-url') return new TextDecoder().decode(rec.data);
+    if(rec.recordType==='text') return new TextDecoder(rec.encoding||'utf-8').decode(rec.data);
+  }catch(e){}
+  return '';
+}
+async function readTagDirect(){
+  if(!NFC_SUPPORTED){toast(t('nfcUnsupported'));return}
+  nfcAbort=new AbortController();
+  showNfcOverlay(t('nfcReadTitle'),t('nfcReadBody'));
+  try{
+    const ndef=new NDEFReader();
+    await ndef.scan({signal:nfcAbort.signal});
+    ndef.onreading=ev=>{
+      let found='';
+      for(const rec of ev.message.records){
+        const v=decodeNdefRecord(rec);
+        if(v){found=v;break}
+      }
+      if(nfcAbort){try{nfcAbort.abort()}catch(e){}nfcAbort=null}
+      onTagRead(found);
+    };
+    ndef.onreadingerror=()=>{
+      if(nfcAbort){try{nfcAbort.abort()}catch(e){}nfcAbort=null}
+      hideNfcOverlay();
+      toast(t('nfcReadErr'));
+    };
+  }catch(e){
+    nfcAbort=null;
+    hideNfcOverlay();
+    toast(nfcErrMsg(e));
+  }
+}
+function onTagRead(url){
+  if(!url){hideNfcOverlay();toast(t('nfcEmptyTag'));return}
+  // a Revo link (any generation) goes straight to the card it points at
+  if(/#(c|d|edit)=/.test(url)){
+    hideNfcOverlay();
+    location.href=url;
+    if(url.split('#')[0]===location.origin+location.pathname) boot();
+    return;
+  }
+  const out=document.getElementById('nfcReadOut');
+  out.innerHTML=`<div style="color:var(--mut);margin-bottom:5px">${t('nfcTagContent')}</div>
+    <a href="${esc(url)}" target="_blank" rel="noopener" class="en">${esc(url)}</a>`;
+  out.classList.add('show');
+}
+
+/* ============================================================
    Onboarding guide — shown after creating a card, and standalone
    from the "how does this work" link on the start screen
    ============================================================ */
@@ -3116,6 +3271,9 @@ function renderModePick(){
         <button onclick="openManualEdit()">${t('manualEditBtn')}</button>
       </div>
     </div>
+    ${NFC_SUPPORTED?`<div class="existing-row" style="justify-content:center;gap:8px" onclick="readTagDirect()">
+      ${svgIcon('nfc',{size:15,sw:1.8})}<span>${t('readTagEntry')}</span>
+    </div>`:''}
     <a class="existing-row" style="justify-content:center;gap:8px" onclick="renderGuideStandalone();return false;" href="#">
       ${svgIcon('qr',{size:14,sw:1.7})}<span>${t('helpLink')}</span>
     </a>
@@ -3345,8 +3503,13 @@ function showResult(viewUrl,editUrl){
         <a class="btn btn-ghost" href="${viewUrl}" target="_blank" rel="noopener">${iconForward({size:14,sw:2})}${t('preview')}</a>
       </div>
     </div>
+    ${NFC_SUPPORTED?`<div class="result-section">
+      <h4>${svgIcon('nfc',{size:14,sw:1.9})}${t('writeDirectTitle')}</h4>
+      <button class="btn btn-main" onclick="writeTagDirect()">${svgIcon('nfc',{size:17,sw:1.9})}${t('writeDirectBtn')}</button>
+      <div class="write-note">${t('writeDirectNote')}</div>
+    </div>`:''}
     <div class="result-section">
-      <h4>${svgIcon('nfc',{size:14,sw:1.9})}${t('nextStepsTitle')}</h4>
+      <h4>${svgIcon('nfc',{size:14,sw:1.9})}${NFC_SUPPORTED?t('guideAltTitle'):t('nextStepsTitle')}</h4>
       ${guideHTML(viewUrl)}
     </div>`;
   box.classList.add('show');
